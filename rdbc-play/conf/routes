@@ -1,1 +1,2 @@
-GET  /  io.rdbc.examples.play.controllers.ApplicationController.index
+GET  /list  io.rdbc.examples.play.controllers.ApplicationController.list
+POST /add   io.rdbc.examples.play.controllers.ApplicationController.add

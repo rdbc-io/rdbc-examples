@@ -2,42 +2,67 @@ package io.rdbc.examples.play.controllers
 
 import javax.inject.Inject
 
-import io.rdbc.examples.play.views
+import io.rdbc.examples.play.{Record, views}
+import io.rdbc.sapi.ConnectionFactory
 import io.rdbc.sapi.Interpolators.SqlInterpolator
-import io.rdbc.sapi.{Connection, ConnectionFactory}
+import play.api.Logger
+import play.api.data.Forms._
+import play.api.data._
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class ApplicationController @Inject()(db: ConnectionFactory) extends Controller {
+class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: MessagesApi)
+  extends Controller with I18nSupport {
 
   private implicit val timeout: FiniteDuration = 30.seconds
 
-  def index = Action.async { _ =>
+  private val form = Form(
+    mapping(
+      "x" -> optional(number),
+      "t" -> optional(localDateTime("yyyy-MM-dd'T'HH:mm")),
+      "s" -> optional(text)
+    )(Record.apply)(Record.unapply)
+  )
 
-    val xsFut = withConnection { conn =>
-      val rsFut = for {
-        select <- conn.select(sql"select x from test order by x")
+  def list = Action.async { _ =>
+
+    val recordsFut = db.withConnection { conn =>
+      for {
+        select <- conn.select(sql"SELECT x, t, s FROM test ORDER BY x, t, s")
         rs <- select.executeForSet()
-      } yield rs
+      } yield {
+        rs.rows.map { row =>
+          Record(row.intOpt("x"), row.localDateTimeOpt("t"), row.strOpt("s"))
+        }
 
-      rsFut.map { rs =>
-        rs.rows.map(_.int("x"))
       }
     }
 
-    xsFut.map { xs =>
-      Ok(views.html.Application.index(xs))
+    recordsFut.map { records =>
+      Ok(views.html.Application.list(records, form))
     }
   }
 
-  private def withConnection[A](body: Connection => Future[A]): Future[A] = {
-    db.connection().flatMap { conn =>
-      body(conn).andThen { case _ =>
-        conn.release()
+  def add = Action.async { implicit request =>
+    form.bindFromRequest().fold(
+      errForm => {
+        Logger.error(s"error in mapping: ${errForm.errors}")
+        Future.successful()
+      },
+      r => {
+        db.withConnection { conn =>
+          for {
+            select <- conn.insert(sql"INSERT INTO test(x, t, s) VALUES (${r.x}, ${r.t}, ${r.s})")
+            _ <- select.execute()
+          } yield ()
+        }
       }
+    ).map { _ =>
+      Redirect(routes.ApplicationController.list)
     }
   }
 

@@ -1,0 +1,68 @@
+@import io.rdbc.examples.play.Record
+
+@(records: Seq[Record], form: Form[Record])(implicit messages: Messages)
+<!doctype html>
+<html lang=en>
+    <head>
+        <meta charset=utf-8>
+        <title>rdbc demo</title>
+        <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #9e9e9e;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        </style>
+    </head>
+    <body>
+
+        <h1>rdbc demo</h1>
+
+        <form action="/add" method="post">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>int4 (Int)</th>
+                        <th>timestamp (LocalDateTime)</th>
+                        <th>varchar (String)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td><input id="x" name="x" type="number" step="1"></td>
+                        <td><input id="t" name="t" type="datetime-local"></td>
+                        <td><input id="s" name="s" type="text"></td>
+                        <td><button type="submit">Add</button></td>
+                    </tr>
+                    @for((r, idx) <- records.zipWithIndex) {
+                        <tr>
+                            <td>@idx</td>
+                            <td>@r.x</td>
+                            <td>@r.t</td>
+                            <td>@r.s</td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </form>
+    </body>
+</html>
