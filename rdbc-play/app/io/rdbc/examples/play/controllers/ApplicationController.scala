@@ -3,6 +3,7 @@ package io.rdbc.examples.play.controllers
 import java.time._
 import javax.inject.Inject
 
+import akka.stream.scaladsl.Source
 import io.rdbc.examples.play.{Record, views}
 import io.rdbc.sapi.ConnectionFactory
 import io.rdbc.sapi.Interpolators.SqlInterpolator
@@ -11,6 +12,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
@@ -31,7 +33,6 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
         rs.rows.map { row =>
           Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
         }
-
       }
     }
 
@@ -40,7 +41,25 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
     }
   }
 
-  //TODO streaming
+  def stream = Action.async { _ =>
+
+    val sourceFut = db.withConnection { conn =>
+      for {
+        select <- conn.select(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        rs <- select.executeForStream()
+      } yield {
+        Source.fromPublisher(rs.rows)
+      }
+    }
+
+    sourceFut.map { source =>
+      Ok.chunked(source.map { row =>
+        Json.toJson(
+          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
+        )
+      })
+    }
+  }
 
   def insert = Action.async { implicit request =>
     form.bindFromRequest().fold(

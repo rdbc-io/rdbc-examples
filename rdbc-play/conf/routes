@@ -1,2 +1,3 @@
 GET  /list  io.rdbc.examples.play.controllers.ApplicationController.list
 POST /insert   io.rdbc.examples.play.controllers.ApplicationController.insert
+GET /stream io.rdbc.examples.play.controllers.ApplicationController.stream
