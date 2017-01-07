@@ -9,6 +9,7 @@
         <style>
         body {
             font-family: sans-serif;
+            font-size: 13px;
         }
 
         table {
@@ -31,14 +32,14 @@
 
         <h1>rdbc demo</h1>
 
-        <form action="/add" method="post">
+        <form action="/insert" method="post">
 
             <table>
                 <thead>
                     <tr>
                         <th></th>
                         <th>int4 (Int)</th>
-                        <th>timestamp (LocalDateTime)</th>
+                        <th>timestamptz (Instant)</th>
                         <th>varchar (String)</th>
                         <th></th>
                     </tr>
@@ -46,15 +47,15 @@
                 <tbody>
                     <tr>
                         <td></td>
-                        <td><input id="x" name="x" type="number" step="1"></td>
-                        <td><input id="t" name="t" type="datetime-local"></td>
+                        <td><input id="i" name="i" type="number" step="1"></td>
+                        <td><input id="t" name="t" type="datetime-local"> UTC</td>
                         <td><input id="s" name="s" type="text"></td>
                         <td><button type="submit">Add</button></td>
                     </tr>
                     @for((r, idx) <- records.zipWithIndex) {
                         <tr>
                             <td>@idx</td>
-                            <td>@r.x</td>
+                            <td>@r.i</td>
                             <td>@r.t</td>
                             <td>@r.s</td>
                             <td></td>

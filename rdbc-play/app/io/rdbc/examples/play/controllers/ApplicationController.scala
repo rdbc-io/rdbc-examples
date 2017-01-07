@@ -1,5 +1,6 @@
 package io.rdbc.examples.play.controllers
 
+import java.time._
 import javax.inject.Inject
 
 import io.rdbc.examples.play.{Record, views}
@@ -20,23 +21,15 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
 
   private implicit val timeout: FiniteDuration = 30.seconds
 
-  private val form = Form(
-    mapping(
-      "x" -> optional(number),
-      "t" -> optional(localDateTime("yyyy-MM-dd'T'HH:mm")),
-      "s" -> optional(text)
-    )(Record.apply)(Record.unapply)
-  )
-
   def list = Action.async { _ =>
 
     val recordsFut = db.withConnection { conn =>
       for {
-        select <- conn.select(sql"SELECT x, t, s FROM test ORDER BY x, t, s")
+        select <- conn.select(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
         rs <- select.executeForSet()
       } yield {
         rs.rows.map { row =>
-          Record(row.intOpt("x"), row.localDateTimeOpt("t"), row.strOpt("s"))
+          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
         }
 
       }
@@ -47,16 +40,18 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
     }
   }
 
-  def add = Action.async { implicit request =>
+  //TODO streaming
+
+  def insert = Action.async { implicit request =>
     form.bindFromRequest().fold(
       errForm => {
         Logger.error(s"error in mapping: ${errForm.errors}")
-        Future.successful()
+        Future.successful(())
       },
       r => {
         db.withConnection { conn =>
           for {
-            select <- conn.insert(sql"INSERT INTO test(x, t, s) VALUES (${r.x}, ${r.t}, ${r.s})")
+            select <- conn.insert(sql"INSERT INTO rdbc_demo(i, t, s) VALUES (${r.i}, ${r.t}, ${r.s})")
             _ <- select.execute()
           } yield ()
         }
@@ -65,5 +60,16 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
       Redirect(routes.ApplicationController.list)
     }
   }
+
+  private val form = Form(
+    mapping(
+      "x" -> optional(number),
+      "t" -> optional(localDateTime("yyyy-MM-dd'T'HH:mm").transform[Instant](
+        ldt => ldt.toInstant(ZoneOffset.UTC),
+        inst => LocalDateTime.ofInstant(inst, ZoneOffset.UTC)
+      )),
+      "s" -> optional(text)
+    )(Record.apply)(Record.unapply)
+  )
 
 }
