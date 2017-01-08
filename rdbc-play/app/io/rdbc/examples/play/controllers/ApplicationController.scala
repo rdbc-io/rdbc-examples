@@ -82,7 +82,7 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
 
   private val form = Form(
     mapping(
-      "x" -> optional(number),
+      "i" -> optional(number),
       "t" -> optional(localDateTime("yyyy-MM-dd'T'HH:mm").transform[Instant](
         ldt => ldt.toInstant(ZoneOffset.UTC),
         inst => LocalDateTime.ofInstant(inst, ZoneOffset.UTC)
