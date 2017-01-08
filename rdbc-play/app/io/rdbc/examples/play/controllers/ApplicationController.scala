@@ -5,8 +5,7 @@ import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
 import io.rdbc.examples.play.{Record, views}
-import io.rdbc.sapi.ConnectionFactory
-import io.rdbc.sapi.Interpolators.SqlInterpolator
+import io.rdbc.sapi._
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -21,7 +20,7 @@ import scala.concurrent.duration._
 class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: MessagesApi)
   extends Controller with I18nSupport {
 
-  private implicit val timeout: FiniteDuration = 30.seconds
+  private implicit val timeout = 30.seconds.timeout
 
   def list = Action.async { _ =>
 

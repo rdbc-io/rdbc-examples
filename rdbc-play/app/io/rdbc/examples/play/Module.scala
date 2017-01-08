@@ -4,8 +4,7 @@ import javax.inject.Inject
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import io.rdbc.pgsql.transport.netty.{NettyPgConnFactoryConfig, NettyPgConnectionFactory}
-import io.rdbc.sapi.ConnectionFactory
-import io.rdbc.sapi.Interpolators.SqlInterpolator
+import io.rdbc.sapi._
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.concurrent.Execution.Implicits._
 
@@ -18,18 +17,18 @@ class Module extends AbstractModule {
   @Singleton
   @Inject
   def connectionFactory(lifecycle: ApplicationLifecycle): ConnectionFactory = {
-    implicit val timeout = 10.seconds
+    implicit val timeout = 10.seconds.timeout
     val factory = NettyPgConnectionFactory(
       NettyPgConnFactoryConfig("localhost", 5432, "povder", "povder")
         .copy(ec = play.api.libs.concurrent.Execution.defaultContext)
     )
 
     val bootstrap = factory.withConnection { conn =>
-      conn.statement(sql"create table if not exists rdbc_demo(i int4, t timestamptz, s varchar)")
-        .flatMap(_.executeIgnoringResult())
+      conn.ddl("create table if not exists rdbc_demo(i int4, t timestamptz, s varchar)")
+        .flatMap(_.execute())
     }
 
-    Await.result(bootstrap, timeout)
+    Await.result(bootstrap, timeout.value)
 
     lifecycle.addStopHook { () =>
       factory.shutdown()
