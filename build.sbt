@@ -41,7 +41,7 @@ lazy val examplesRoot = (project in file("."))
 lazy val play = (project in file("rdbc-play"))
   .settings(commonSettings: _*)
   .settings(
-    scalaVersion := "2.11.8",
+    scalaVersion := "2.11.9",
     name := "rdbc-play",
     libraryDependencies ++= Vector(
       Library.rdbcScalaApi,
