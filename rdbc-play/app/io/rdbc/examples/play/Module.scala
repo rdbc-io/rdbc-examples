@@ -24,8 +24,8 @@ class Module extends AbstractModule {
     )
 
     val bootstrap = factory.withConnection { conn =>
-      conn.ddl("create table if not exists rdbc_demo(i int4, t timestamptz, s varchar)")
-        .flatMap(_.execute())
+      conn.statement("create table if not exists rdbc_demo(i int4, t timestamptz, s varchar)")
+        .flatMap(_.noParamsF).flatMap(_.execute())
     }
 
     Await.result(bootstrap, timeout.value)

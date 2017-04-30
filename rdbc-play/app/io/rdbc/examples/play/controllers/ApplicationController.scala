@@ -26,7 +26,7 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
 
     val recordsFut = db.withConnection { conn =>
       for {
-        select <- conn.select(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        select <- conn.statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
         rs <- select.executeForSet()
       } yield {
         rs.rows.map { row =>
@@ -44,7 +44,7 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
 
     val sourceFut = db.withConnection { conn =>
       for {
-        select <- conn.select(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        select <- conn.statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
         rs <- select.executeForStream()
       } yield {
         Source.fromPublisher(rs.rows)
@@ -69,7 +69,7 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
       r => {
         db.withConnection { conn =>
           for {
-            select <- conn.insert(sql"INSERT INTO rdbc_demo(i, t, s) VALUES (${r.i}, ${r.t}, ${r.s})")
+            select <- conn.statement(sql"INSERT INTO rdbc_demo(i, t, s) VALUES (${r.i}, ${r.t}, ${r.s})")
             _ <- select.execute()
           } yield ()
         }
