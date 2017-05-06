@@ -23,40 +23,32 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
   private implicit val timeout = 30.seconds.timeout
 
   def list = Action.async { _ =>
-
-    val recordsFut = db.withConnection { conn =>
+    db.withConnection { conn =>
       for {
         select <- conn.statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
         rs <- select.executeForSet()
       } yield {
-        rs.rows.map { row =>
+        val records = rs.rows.map { row =>
           Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
         }
+        Ok(views.html.Application.list(records, form))
       }
-    }
-
-    recordsFut.map { records =>
-      Ok(views.html.Application.list(records, form))
     }
   }
 
   def stream = Action.async { _ =>
-
-    val sourceFut = db.withConnection { conn =>
+    db.withConnection { conn =>
       for {
         select <- conn.statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
         rs <- select.executeForStream()
       } yield {
-        Source.fromPublisher(rs.rows)
+        val source = Source.fromPublisher(rs.rows).map { row =>
+          Json.toJson(
+            Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
+          )
+        }
+        Ok.chunked(source)
       }
-    }
-
-    sourceFut.map { source =>
-      Ok.chunked(source.map { row =>
-        Json.toJson(
-          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
-        )
-      })
     }
   }
 

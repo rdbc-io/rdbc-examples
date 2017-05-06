@@ -8,4 +8,4 @@ object Record {
   implicit val writes: Writes[Record] = Json.writes[Record]
 }
 
-case class Record(i: Option[Int], t: Option[Instant], s: Option[String])
+final case class Record(i: Option[Int], t: Option[Instant], s: Option[String])
