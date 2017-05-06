@@ -45,7 +45,10 @@ lazy val play = (project in file("rdbc-play"))
     name := "rdbc-play",
     libraryDependencies ++= Vector(
       Library.rdbcScalaApi,
-      Library.rdbcPgsqlNetty
+      Library.rdbcPgsqlNetty,
+      Library.webjars,
+      Library.jquery,
+      Library.webshim
     ),
     buildInfoPackage := "io.rdbc.examples.play"
   ).enablePlugins(PlayScala)
