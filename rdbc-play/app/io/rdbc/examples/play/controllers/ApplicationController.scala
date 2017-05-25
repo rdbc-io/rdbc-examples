@@ -6,6 +6,7 @@ import javax.inject.Inject
 import akka.stream.scaladsl.Source
 import io.rdbc.examples.play.{Record, views}
 import io.rdbc.sapi._
+import io.rdbc.util.Futures._
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -23,11 +24,10 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
   private implicit val timeout = 30.seconds.timeout
 
   def list = Action.async { _ =>
-    db.withConnection { conn =>
-      for {
-        select <- conn.statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
-        rs <- select.executeForSet()
-      } yield {
+    db.withConnectionF { conn =>
+      conn
+        .statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        .executeForSet().map { rs =>
         val records = rs.rows.map { row =>
           Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
         }
@@ -37,16 +37,21 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
   }
 
   def stream = Action.async { _ =>
-    db.withConnection { conn =>
-      for {
-        select <- conn.statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
-        rs <- select.executeForStream()
-      } yield {
+    db.connection().flatMap { conn =>
+      conn
+        .statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        .executeForStream().map { rs =>
         val source = Source.fromPublisher(rs.rows).map { row =>
           Json.toJson(
             Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
           )
+        }.watchTermination() { case (_, done) =>
+          done.andThenF { case _ =>
+            conn.release()
+          }
         }
+        //TODO this construct of connection releasing after stream completes
+        // will be so common that stream needs to facilitate handling this
         Ok.chunked(source)
       }
     }
@@ -59,11 +64,10 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
         Future.successful(())
       },
       r => {
-        db.withConnection { conn =>
-          for {
-            select <- conn.statement(sql"INSERT INTO rdbc_demo(i, t, s) VALUES (${r.i}, ${r.t}, ${r.s})")
-            _ <- select.execute()
-          } yield ()
+        db.withConnectionF { conn =>
+          conn
+            .statement(sql"INSERT INTO rdbc_demo(i, t, s) VALUES (${r.i}, ${r.t}, ${r.s})")
+            .execute()
         }
       }
     ).map { _ =>

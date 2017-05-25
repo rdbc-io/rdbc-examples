@@ -28,10 +28,10 @@ class Module extends AbstractModule {
       cfg.getString("rdbc.pgsql.password").getOrElse("postgres")
     )
 
-    val bootstrap = factory.withConnection { conn =>
+    val bootstrap = factory.withConnectionF { conn =>
       conn.statement(
         sql"CREATE TABLE IF NOT EXISTS rdbc_demo(i INT4, t TIMESTAMPTZ, s VARCHAR)"
-      ).flatMap(_.execute())
+      ).execute()
     }
 
     Await.result(bootstrap, timeout.value)
