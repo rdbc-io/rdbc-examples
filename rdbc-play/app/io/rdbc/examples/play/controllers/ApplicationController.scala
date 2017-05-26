@@ -37,23 +37,23 @@ class ApplicationController @Inject()(db: ConnectionFactory, val messagesApi: Me
   }
 
   def stream = Action.async { _ =>
-    db.connection().flatMap { conn =>
-      conn
+    db.connection().map { conn =>
+      val pub = conn
         .statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
-        .executeForStream().map { rs =>
-        val source = Source.fromPublisher(rs.rows).map { row =>
-          Json.toJson(
-            Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
-          )
-        }.watchTermination() { case (_, done) =>
-          done.andThenF { case _ =>
-            conn.release()
-          }
+        .stream()
+
+      val source = Source.fromPublisher(pub).map { row =>
+        Json.toJson(
+          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
+        )
+      }.watchTermination() { case (_, done) =>
+        done.andThenF { case _ =>
+          conn.release()
         }
-        //TODO this construct of connection releasing after stream completes
-        // will be so common that stream needs to facilitate handling this
-        Ok.chunked(source)
       }
+      //TODO this construct of connection releasing after stream completes
+      // will be so common that stream needs to facilitate handling this
+      Ok.chunked(source)
     }
   }
 
