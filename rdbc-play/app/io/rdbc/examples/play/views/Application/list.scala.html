@@ -1,6 +1,8 @@
 @import io.rdbc.examples.play.Record
+@import helper._
+@import io.rdbc.examples.play.controllers.routes.ApplicationController
 
-@(records: Seq[Record], form: Form[Record])(implicit messages: Messages)
+@(records: Seq[Record])(implicit requestHeader: RequestHeader)
 <!doctype html>
 <html lang=en>
     <head>
@@ -29,7 +31,7 @@
         }
         </style>
 
-        <script src='/webjars/jquery/3.2.0/jquery.min.js'></script>
+        <script src='/webjars/jquery/3.2.1/jquery.min.js'></script>
         <script src='/webjars/webshim/1.15.10/js-webshim/minified/polyfiller.js'></script>
 
         <script type="text/javascript">
@@ -40,7 +42,7 @@
 
         <h1>rdbc demo</h1>
 
-        <form action="/insert" method="post">
+        @form(CSRF(ApplicationController.insert())) {
 
             <table>
                 <thead>
@@ -72,6 +74,6 @@
                 </tbody>
             </table>
 
-        </form>
+        }
     </body>
 </html>

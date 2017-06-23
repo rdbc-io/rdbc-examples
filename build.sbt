@@ -4,7 +4,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 lazy val commonSettings = Seq(
   organization := "io.rdbc",
   scalaVersion := "2.12.2",
-  crossScalaVersions := Seq("2.11.11"),
+  crossScalaVersions := Vector("2.11.11"),
   scalacOptions ++= Vector(
     "-unchecked",
     "-deprecation",
@@ -41,14 +41,16 @@ lazy val examplesRoot = (project in file("."))
 lazy val play = (project in file("rdbc-play"))
   .settings(commonSettings: _*)
   .settings(
-    scalaVersion := "2.11.11",
     name := "rdbc-play",
     libraryDependencies ++= Vector(
       Library.rdbcScalaApi,
+      Library.rdbcUtil,
+      Library.rdbcPool,
       Library.rdbcPgsqlNetty,
       Library.webjars,
       Library.jquery,
-      Library.webshim
+      Library.webshim,
+      guice
     ),
     buildInfoPackage := "io.rdbc.examples.play"
   ).enablePlugins(PlayScala)
