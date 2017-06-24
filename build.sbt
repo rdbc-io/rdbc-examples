@@ -1,8 +1,8 @@
-import de.heikoseeberger.sbtheader.license.Apache2_0
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 lazy val commonSettings = Seq(
   organization := "io.rdbc",
+  organizationName := "rdbc contributors",
   scalaVersion := "2.12.2",
   crossScalaVersions := Vector("2.11.11"),
   scalacOptions ++= Vector(
@@ -13,9 +13,7 @@ lazy val commonSettings = Seq(
     "-encoding", "UTF-8"
   ),
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-  headers := Map(
-    "scala" -> Apache2_0("2017", "Krzysztof Pado")
-  ),
+  startYear := Some(2017),
   resolvers += Resolver.bintrayRepo("rdbc", "maven"),
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
