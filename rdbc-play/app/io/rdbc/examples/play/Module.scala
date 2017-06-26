@@ -25,7 +25,7 @@ import io.rdbc.pgsql.transport.netty.NettyPgConnectionFactory
 import io.rdbc.pool.sapi.ConnectionPool
 import io.rdbc.pool.sapi.ConnectionPoolConfig.Default
 import io.rdbc.sapi._
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Await
@@ -39,6 +39,7 @@ class Module extends AbstractModule {
   def connectionFactory(actorSystem: ActorSystem,
                         lifecycle: ApplicationLifecycle,
                         cfg: Configuration): ConnectionFactory = {
+    logVersions()
     implicit val timeout = 10.seconds.timeout
 
     val pool = new ConnectionPool(
@@ -66,6 +67,13 @@ class Module extends AbstractModule {
     }
 
     pool
+  }
+
+  private def logVersions(): Unit = {
+    //Logger.info(s"Using rdbc-api-scala ${io.rdbc.sapi.BuildInfo.version} built at ${io.rdbc.sapi.BuildInfo.buildTime}")
+    Logger.info(s"Using rdbc-pgsql ${io.rdbc.pgsql.core.BuildInfo.version} built at ${io.rdbc.pgsql.core.BuildInfo.buildTime}")
+    Logger.info(s"Using rdbc-pgsql-transport-netty ${io.rdbc.pgsql.transport.netty.BuildInfo.version} built at ${io.rdbc.pgsql.transport.netty.BuildInfo.buildTime}")
+    //Logger.info(s"Using rdbc-pool ${io.rdbc.pool.BuildInfo.version} built at ${io.rdbc.pool.BuildInfo.buildTime}")
   }
 
   def configure(): Unit = ()
