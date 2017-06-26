@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package io.rdbc.examples.play
+package io.rdbc.examples.play.scheduler
 
-import java.time.Instant
+import akka.actor.Cancellable
+import io.rdbc.util.scheduler.ScheduledTask
 
-import play.api.libs.json.{Json, Writes}
-
-object Record {
-  implicit val writes: Writes[Record] = Json.writes[Record]
+class AkkaScheduledTask(task: Cancellable) extends ScheduledTask {
+  def cancel(): Unit = task.cancel()
 }
-
-final case class Record(i: Option[Int], t: Option[Instant], s: Option[String])

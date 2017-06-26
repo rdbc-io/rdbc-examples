@@ -5,6 +5,7 @@ jdk:
 - openjdk8
 scala:
 - 2.12.2
+- 2.11.11
 script: sbt ++$TRAVIS_SCALA_VERSION test
 cache:
   directories:

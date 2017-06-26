@@ -1,10 +1,10 @@
-import de.heikoseeberger.sbtheader.license.Apache2_0
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 lazy val commonSettings = Seq(
   organization := "io.rdbc",
+  organizationName := "rdbc contributors",
   scalaVersion := "2.12.2",
-  crossScalaVersions := Seq("2.11.11"),
+  crossScalaVersions := Vector("2.11.11"),
   scalacOptions ++= Vector(
     "-unchecked",
     "-deprecation",
@@ -13,9 +13,7 @@ lazy val commonSettings = Seq(
     "-encoding", "UTF-8"
   ),
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-  headers := Map(
-    "scala" -> Apache2_0("2017", "Krzysztof Pado")
-  ),
+  startYear := Some(2017),
   resolvers += Resolver.bintrayRepo("rdbc", "maven"),
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
@@ -41,14 +39,16 @@ lazy val examplesRoot = (project in file("."))
 lazy val play = (project in file("rdbc-play"))
   .settings(commonSettings: _*)
   .settings(
-    scalaVersion := "2.11.11",
     name := "rdbc-play",
     libraryDependencies ++= Vector(
       Library.rdbcScalaApi,
+      Library.rdbcUtil,
+      Library.rdbcPool,
       Library.rdbcPgsqlNetty,
       Library.webjars,
       Library.jquery,
-      Library.webshim
+      Library.webshim,
+      guice
     ),
     buildInfoPackage := "io.rdbc.examples.play"
   ).enablePlugins(PlayScala)

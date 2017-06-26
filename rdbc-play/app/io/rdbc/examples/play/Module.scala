@@ -1,13 +1,32 @@
+/*
+ * Copyright 2017 rdbc contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.rdbc.examples.play
 
 import javax.inject.Inject
 
+import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides, Singleton}
+import io.rdbc.examples.play.scheduler.AkkaScheduler
 import io.rdbc.pgsql.transport.netty.NettyPgConnectionFactory
+import io.rdbc.pool.sapi.ConnectionPool
+import io.rdbc.pool.sapi.ConnectionPoolConfig.Default
 import io.rdbc.sapi._
 import play.api.Configuration
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -17,30 +36,36 @@ class Module extends AbstractModule {
   @Provides
   @Singleton
   @Inject
-  def connectionFactory(lifecycle: ApplicationLifecycle,
+  def connectionFactory(actorSystem: ActorSystem,
+                        lifecycle: ApplicationLifecycle,
                         cfg: Configuration): ConnectionFactory = {
     implicit val timeout = 10.seconds.timeout
 
-    val factory = NettyPgConnectionFactory(
-      cfg.getString("rdbc.pgsql.host").getOrElse("localhost"),
-      cfg.getInt("rdbc.pgsql.port").getOrElse(5432),
-      cfg.getString("rdbc.pgsql.username").getOrElse("postgres"),
-      cfg.getString("rdbc.pgsql.password").getOrElse("postgres")
+    val pool = new ConnectionPool(
+      connFact = NettyPgConnectionFactory(
+        cfg.getOptional[String]("rdbc.pgsql.host").getOrElse("localhost"),
+        cfg.getOptional[Int]("rdbc.pgsql.port").getOrElse(5432),
+        cfg.getOptional[String]("rdbc.pgsql.username").getOrElse("postgres"),
+        cfg.getOptional[String]("rdbc.pgsql.password").getOrElse("postgres")
+      ),
+      config = Default.copy(
+        taskScheduler = () => new AkkaScheduler(actorSystem)
+      )
     )
 
-    val bootstrap = factory.withConnectionF { conn =>
+    val bootstrap = pool.withConnection { conn =>
       conn.statement(
         sql"CREATE TABLE IF NOT EXISTS rdbc_demo(i INT4, t TIMESTAMPTZ, s VARCHAR)"
       ).execute()
     }
 
-    Await.result(bootstrap, timeout.value)
+    Await.result(bootstrap, 15.seconds)
 
     lifecycle.addStopHook { () =>
-      factory.shutdown()
+      pool.shutdown()
     }
 
-    factory
+    pool
   }
 
   def configure(): Unit = ()
