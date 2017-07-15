@@ -21,7 +21,9 @@ import javax.inject.Inject
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import io.rdbc.examples.play.scheduler.AkkaScheduler
-import io.rdbc.pgsql.transport.netty.NettyPgConnectionFactory
+import io.rdbc.pgsql.core.config.sapi.Auth
+import io.rdbc.pgsql.transport.netty.sapi.NettyPgConnectionFactory
+import io.rdbc.pgsql.transport.netty.sapi.NettyPgConnectionFactory.Config
 import io.rdbc.pool.sapi.ConnectionPool
 import io.rdbc.pool.sapi.ConnectionPoolConfig.Default
 import io.rdbc.sapi._
@@ -43,12 +45,14 @@ class Module extends AbstractModule {
     implicit val timeout = 10.seconds.timeout
 
     val pool = new ConnectionPool(
-      connFact = NettyPgConnectionFactory(
-        cfg.getOptional[String]("rdbc.pgsql.host").getOrElse("localhost"),
-        cfg.getOptional[Int]("rdbc.pgsql.port").getOrElse(5432),
-        cfg.getOptional[String]("rdbc.pgsql.username").getOrElse("postgres"),
-        cfg.getOptional[String]("rdbc.pgsql.password").getOrElse("postgres")
-      ),
+      connFact = NettyPgConnectionFactory(Config(
+        host = cfg.getOptional[String]("rdbc.pgsql.host").getOrElse("localhost"),
+        port = cfg.getOptional[Int]("rdbc.pgsql.port").getOrElse(5432),
+        authenticator = Auth.password(
+          cfg.getOptional[String]("rdbc.pgsql.username").getOrElse("postgres"),
+          cfg.getOptional[String]("rdbc.pgsql.password").getOrElse("postgres")
+        )
+      )),
       config = Default.copy(
         taskScheduler = () => new AkkaScheduler(actorSystem)
       )

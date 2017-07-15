@@ -1,4 +1,4 @@
 GET         /list                 io.rdbc.examples.play.controllers.ApplicationController.list
 POST        /insert               io.rdbc.examples.play.controllers.ApplicationController.insert
 GET         /stream               io.rdbc.examples.play.controllers.ApplicationController.stream
-GET         /webjars/*file        controllers.WebJarAssets.at(file)
+GET         /webjars/*file        org.webjars.play.WebJarAssets.at(file)
