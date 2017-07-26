@@ -25,7 +25,7 @@ import io.rdbc.pgsql.core.config.sapi.Auth
 import io.rdbc.pgsql.transport.netty.sapi.NettyPgConnectionFactory
 import io.rdbc.pgsql.transport.netty.sapi.NettyPgConnectionFactory.Config
 import io.rdbc.pool.sapi.ConnectionPool
-import io.rdbc.pool.sapi.ConnectionPoolConfig.Default
+import io.rdbc.pool.sapi.ConnectionPoolConfig
 import io.rdbc.sapi._
 import play.api.{Configuration, Logger}
 import play.api.inject.ApplicationLifecycle
@@ -44,7 +44,7 @@ class Module extends AbstractModule {
     logVersions()
     implicit val timeout = 10.seconds.timeout
 
-    val pool = new ConnectionPool(
+    val pool = ConnectionPool(
       connFact = NettyPgConnectionFactory(Config(
         host = cfg.getOptional[String]("rdbc.pgsql.host").getOrElse("localhost"),
         port = cfg.getOptional[Int]("rdbc.pgsql.port").getOrElse(5432),
@@ -53,7 +53,7 @@ class Module extends AbstractModule {
           cfg.getOptional[String]("rdbc.pgsql.password").getOrElse("postgres")
         )
       )),
-      config = Default.copy(
+      config = ConnectionPoolConfig(
         taskScheduler = () => new AkkaScheduler(actorSystem)
       )
     )
@@ -74,10 +74,10 @@ class Module extends AbstractModule {
   }
 
   private def logVersions(): Unit = {
-    //Logger.info(s"Using rdbc-api-scala ${io.rdbc.sapi.BuildInfo.version} built at ${io.rdbc.sapi.BuildInfo.buildTime}")
+    Logger.info(s"Using rdbc-api-scala ${io.rdbc.sapi.BuildInfo.version} built at ${io.rdbc.sapi.BuildInfo.buildTime}")
     Logger.info(s"Using rdbc-pgsql ${io.rdbc.pgsql.core.BuildInfo.version} built at ${io.rdbc.pgsql.core.BuildInfo.buildTime}")
     Logger.info(s"Using rdbc-pgsql-transport-netty ${io.rdbc.pgsql.transport.netty.BuildInfo.version} built at ${io.rdbc.pgsql.transport.netty.BuildInfo.buildTime}")
-    //Logger.info(s"Using rdbc-pool ${io.rdbc.pool.BuildInfo.version} built at ${io.rdbc.pool.BuildInfo.buildTime}")
+    Logger.info(s"Using rdbc-pool ${io.rdbc.pool.BuildInfo.version} built at ${io.rdbc.pool.BuildInfo.buildTime}")
   }
 
   def configure(): Unit = ()
