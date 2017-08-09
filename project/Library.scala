@@ -1,11 +1,11 @@
 import sbt._
 
 object Library {
-  private val rdbcVersion = "0.0.67"
+  private val rdbcVersion = "0.0.69"
 
   val rdbcScalaApi = "io.rdbc" %% "rdbc-api-scala" % rdbcVersion
   val rdbcUtil = "io.rdbc" %% "rdbc-util" % rdbcVersion
-  val rdbcPool = "io.rdbc.pool" %% "rdbc-pool-scala" % "0.0.4"
+  val rdbcPool = "io.rdbc.pool" %% "rdbc-pool-scala" % "0.0.5"
   val rdbcPgsqlNetty = "io.rdbc.pgsql" %% "pgsql-transport-netty" % "0.3.1.18"
 
   val webjars = "org.webjars" %% "webjars-play" % "2.6.1"
