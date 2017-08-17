@@ -19,10 +19,9 @@ package io.rdbc.examples.play.controllers
 import java.time._
 import javax.inject.Inject
 
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Sink, Source}
 import io.rdbc.examples.play.{Record, views}
 import io.rdbc.sapi._
-import io.rdbc.util.Futures._
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -61,13 +60,7 @@ class ApplicationController @Inject()(db: ConnectionFactory)(implicit ec: Execut
         Json.toJson(
           Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
         )
-      }.watchTermination() { case (_, done) =>
-        done.andThenF { case _ =>
-          conn.release()
-        }
-      }
-      //TODO this construct of connection releasing after stream completes
-      // will be so common that stream needs to facilitate handling this
+      }.alsoTo(Sink.onComplete(_ => conn.release()))
       Ok.chunked(source)
     }
   }
