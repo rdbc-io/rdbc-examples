@@ -8,7 +8,7 @@ object Library {
   val rdbcPool = "io.rdbc.pool" %% "rdbc-pool-scala" % "0.0.7"
   val rdbcPgsqlNetty = "io.rdbc.pgsql" %% "pgsql-transport-netty" % "0.3.1.20"
 
-  val webjars = "org.webjars" %% "webjars-play" % "2.6.1"
+  val webjars = "org.webjars" %% "webjars-play" % "2.6.2"
   val jquery = "org.webjars" % "jquery" % "3.2.1"
   val webshim = "org.webjars.bower" % "webshim" % "1.15.10"
 }

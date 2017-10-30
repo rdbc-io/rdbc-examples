@@ -3,7 +3,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 lazy val commonSettings = Seq(
   organization := "io.rdbc",
   organizationName := "rdbc contributors",
-  scalaVersion := "2.12.3",
+  scalaVersion := "2.12.4",
   scalacOptions ++= Vector(
     "-unchecked",
     "-deprecation",
