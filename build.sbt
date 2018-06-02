@@ -1,9 +1,15 @@
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
+initialize := {
+  val _ = initialize.value
+  if (sys.props("java.specification.version") != "1.8")
+    sys.error("Java 8 is required for this project.")
+}
+
 lazy val commonSettings = Seq(
   organization := "io.rdbc",
   organizationName := "rdbc contributors",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.6",
   scalacOptions ++= Vector(
     "-unchecked",
     "-deprecation",
@@ -25,29 +31,55 @@ lazy val commonSettings = Seq(
     commitNextVersion,
     pushChanges
   ),
-  buildInfoKeys := Vector(version, scalaVersion, git.gitHeadCommit, BuildInfoKey.action("buildTime") {
-    java.time.Instant.now()
-  }),
   scalastyleFailOnError := true
 )
 
 lazy val examplesRoot = (project in file("."))
   .settings(commonSettings: _*)
-  .aggregate(play)
+  .aggregate(`play-scala`, `play-java`, `simple-java`)
 
-lazy val play = (project in file("rdbc-play"))
+lazy val `play-scala` = (project in file("play-scala"))
   .settings(commonSettings: _*)
   .settings(
-    name := "rdbc-play",
+    name := "rdbc-play-scala",
     libraryDependencies ++= Vector(
       Library.rdbcScalaApi,
       Library.rdbcUtil,
-      Library.rdbcPool,
+      Library.rdbcPoolScala,
       Library.rdbcPgsqlNetty,
       Library.webjars,
       Library.jquery,
       Library.webshim,
       guice
-    ),
-    buildInfoPackage := "io.rdbc.examples.play"
+    )
   ).enablePlugins(PlayScala)
+
+
+lazy val `play-java` = (project in file("play-java"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "rdbc-play-java",
+    libraryDependencies ++= Vector(
+      Library.rdbcJavaApi,
+      Library.rdbcUtil,
+      Library.rdbcPoolJava,
+      Library.rdbcPgsqlNetty,
+      Library.webjars,
+      Library.jquery,
+      Library.webshim,
+      guice
+    )
+  ).enablePlugins(PlayJava)
+
+
+lazy val `simple-java` = (project in file("simple-java"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "rdbc-simple-java",
+    libraryDependencies ++= Vector(
+      Library.rdbcJavaApi,
+      Library.rdbcPoolJava,
+      Library.rdbcPgsqlNetty,
+      Library.logback
+    )
+  )

@@ -14,17 +14,19 @@ Chapters below describe the implemented examples.
 
 ### Play Framework
 
-You can find this example in [rdbc-play](https://github.com/rdbc-io/rdbc-examples/tree/master/rdbc-play) directory.
+You can find a Scala version of the example in [rdbc-play-scala](https://github.com/rdbc-io/rdbc-examples/tree/master/rdbc-play-scala)
+directory and Java version in  
+[rdbc-play-java](https://github.com/rdbc-io/rdbc-examples/tree/master/rdbc-play-java).
 
-The project uses the API with the PostgreSQL driver. Before you run the project,
+The projects use the API with the PostgreSQL driver. Before you run the project,
 start PostgreSQL server on the local machine and configure it to accept
 connections with password authentication method using "postgres" username
 and "postgres" password. Alternatively, configure connection parameters
-in [conf/application.conf](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play/conf/application.conf).
+in `conf/application.conf` file.
 
 To run the project, enter the rdbc-examples directory and start the application
-with SBT using `sbt play/run` command. After starting the app, a sample database
-table will be created.
+with SBT using `sbt play-scala/run` or `sbt play-java/run` command. After starting the app, 
+a sample database table will be created.
 
 The application defines a number of routes:
 
@@ -32,9 +34,13 @@ The application defines a number of routes:
 defined in the sample table.
 * [`/stream`](http://localhost:9000/stream) - endpoint streaming table contents as JSONs.
 
-See [`Module`](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play/app/io/rdbc/examples/play/Module.scala)
-class for the code that configures connection pool and creates a sample table. Inspect
-[`ApplicationController`](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play/app/io/rdbc/examples/play/controllers/ApplicationController.scala)
+See `Module` class 
+([Scala](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-scala/app/io/rdbc/examples/playscala/Module.scala),
+[Java](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-java/app/io/rdbc/examples/playjava/Module.java))
+for the code that configures connection pool and creates a sample table. Inspect
+`ApplicationController`
+([Scala](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-scala/app/io/rdbc/examples/playscala/controllers/ApplicationController.scala),
+[Java](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-java/app/io/rdbc/examples/playjava/controllers/ApplicationController.scala))
 class for the implementation of selecting and inserting values and also for the 
 streaming. It may be interesting for you to add many records to the table, say,
 100 000 and compare behavior of the application when:

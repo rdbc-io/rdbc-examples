@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package io.rdbc.examples.play
-
-import javax.inject.Inject
+package io.rdbc.examples.playscala
 
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides, Singleton}
-import io.rdbc.examples.play.scheduler.AkkaScheduler
+import io.rdbc.examples.playscala.scheduler.AkkaScheduler
 import io.rdbc.pgsql.core.config.sapi.Auth
 import io.rdbc.pgsql.transport.netty.sapi.NettyPgConnectionFactory
 import io.rdbc.pgsql.transport.netty.sapi.NettyPgConnectionFactory.Config
-import io.rdbc.pool.sapi.ConnectionPool
-import io.rdbc.pool.sapi.ConnectionPoolConfig
+import io.rdbc.pool.sapi.{ConnectionPool, ConnectionPoolConfig}
 import io.rdbc.sapi._
-import play.api.{Configuration, Logger}
+import javax.inject.Inject
 import play.api.inject.ApplicationLifecycle
+import play.api.{Configuration, Logger}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -45,7 +43,7 @@ class Module extends AbstractModule {
     implicit val timeout = 10.seconds.timeout
 
     val pool = ConnectionPool(
-      connFact = NettyPgConnectionFactory(Config(
+      connectionFactory = NettyPgConnectionFactory(Config(
         host = cfg.getOptional[String]("rdbc.pgsql.host").getOrElse("localhost"),
         port = cfg.getOptional[Int]("rdbc.pgsql.port").getOrElse(5432),
         authenticator = Auth.password(
@@ -54,13 +52,15 @@ class Module extends AbstractModule {
         )
       )),
       config = ConnectionPoolConfig(
-        taskScheduler = () => new AkkaScheduler(actorSystem)
+        size = 5,
+        taskScheduler = () => new AkkaScheduler(actorSystem),
+        ec = actorSystem.dispatcher
       )
     )
 
     val bootstrap = pool.withConnection { conn =>
       conn.statement(
-        sql"CREATE TABLE IF NOT EXISTS rdbc_demo(i INT4, t TIMESTAMPTZ, s VARCHAR)"
+        sql"CREATE TABLE IF NOT EXISTS rdbc_demo(i INT4, t TIMESTAMP, v VARCHAR)"
       ).execute()
     }
 

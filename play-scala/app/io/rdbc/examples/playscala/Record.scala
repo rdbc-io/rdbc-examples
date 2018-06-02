@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rdbc.examples.play
+package io.rdbc.examples.playscala
 
 import java.time.Instant
 
@@ -24,4 +24,6 @@ object Record {
   implicit val writes: Writes[Record] = Json.writes[Record]
 }
 
-final case class Record(i: Option[Int], t: Option[Instant], s: Option[String])
+final case class Record(integer: Option[Int],
+                        timestamp: Option[Instant],
+                        varchar: Option[String])
