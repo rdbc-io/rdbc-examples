@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rdbc.examples.play.scheduler
+package io.rdbc.examples.playscala.scheduler
 
 import akka.actor.ActorSystem
 import io.rdbc.util.scheduler.{ScheduledTask, TaskScheduler}

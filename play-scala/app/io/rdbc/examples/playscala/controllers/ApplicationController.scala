@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.rdbc.examples.play.controllers
+package io.rdbc.examples.playscala.controllers
 
 import java.time._
 import javax.inject.Inject
 
 import akka.stream.scaladsl.{Sink, Source}
-import io.rdbc.examples.play.{Record, views}
+import io.rdbc.examples.playscala.{Record, views}
 import io.rdbc.sapi._
 import play.api.Logger
 import play.api.data.Forms._
@@ -32,7 +32,9 @@ import play.api.mvc.InjectedController
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApplicationController @Inject()(db: ConnectionFactory)(implicit ec: ExecutionContext)
+class ApplicationController @Inject()(db: ConnectionFactory,
+                                      listView: views.html.list)
+                                     (implicit ec: ExecutionContext)
   extends InjectedController with I18nSupport {
 
   private implicit val timeout = 30.seconds.timeout
@@ -40,12 +42,12 @@ class ApplicationController @Inject()(db: ConnectionFactory)(implicit ec: Execut
   def list = Action.async { implicit request =>
     db.withConnection { conn =>
       conn
-        .statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        .statement(sql"SELECT i, t, v FROM rdbc_demo ORDER BY i, t, v")
         .executeForSet().map { rs =>
         val records = rs.rows.map { row =>
-          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
+          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("v"))
         }
-        Ok(views.html.Application.list(records))
+        Ok(listView(records))
       }
     }
   }
@@ -53,12 +55,12 @@ class ApplicationController @Inject()(db: ConnectionFactory)(implicit ec: Execut
   def stream = Action.async { _ =>
     db.connection().map { conn =>
       val pub = conn
-        .statement(sql"SELECT i, t, s FROM rdbc_demo ORDER BY i, t, s")
+        .statement(sql"SELECT i, t, v FROM rdbc_demo ORDER BY i, t, v")
         .stream()
 
       val source = Source.fromPublisher(pub).map { row =>
         Json.toJson(
-          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("s"))
+          Record(row.intOpt("i"), row.instantOpt("t"), row.strOpt("v"))
         )
       }.alsoTo(Sink.onComplete(_ => conn.release()))
       Ok.chunked(source)
@@ -68,13 +70,12 @@ class ApplicationController @Inject()(db: ConnectionFactory)(implicit ec: Execut
   def insert = Action.async { implicit request =>
     form.bindFromRequest().fold(
       errForm => {
-        Logger.error(s"error in mapping: ${errForm.errors}")
-        Future.successful(())
+        Future.failed(new RuntimeException(s"error in mapping: ${errForm.errors}"))
       },
       r => {
         db.withConnection { conn =>
           conn
-            .statement(sql"INSERT INTO rdbc_demo(i, t, s) VALUES (${r.i}, ${r.t}, ${r.s})")
+            .statement(sql"INSERT INTO rdbc_demo(i, t, v) VALUES (${r.integer}, ${r.timestamp}, ${r.varchar})")
             .execute()
         }
       }
@@ -85,12 +86,12 @@ class ApplicationController @Inject()(db: ConnectionFactory)(implicit ec: Execut
 
   private val form = Form(
     mapping(
-      "i" -> optional(number),
-      "t" -> optional(localDateTime("yyyy-MM-dd'T'HH:mm").transform[Instant](
+      "integer" -> optional(number),
+      "timestamp" -> optional(localDateTime("yyyy-MM-dd'T'HH:mm").transform[Instant](
         ldt => ldt.toInstant(ZoneOffset.UTC),
         inst => LocalDateTime.ofInstant(inst, ZoneOffset.UTC)
       )),
-      "s" -> optional(text)
+      "varchar" -> optional(text)
     )(Record.apply)(Record.unapply)
   )
 

@@ -1,0 +1,5 @@
+GET         /list                 io.rdbc.examples.playjava.controllers.ApplicationController.list
+POST        /insert               io.rdbc.examples.playjava.controllers.ApplicationController.insert
+GET         /stream               io.rdbc.examples.playjava.controllers.ApplicationController.stream
+
+->          /webjars              webjars.Routes

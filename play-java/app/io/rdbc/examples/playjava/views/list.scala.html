@@ -1,8 +1,11 @@
-@import io.rdbc.examples.play.Record
+@import io.rdbc.examples.playjava.Record
 @import helper._
-@import io.rdbc.examples.play.controllers.routes.ApplicationController
+@import io.rdbc.examples.playjava.controllers.routes.ApplicationController
+@import org.webjars.play.WebJarsUtil
 
-@(records: Seq[Record])(implicit requestHeader: RequestHeader)
+@this(webJarsUtil: WebJarsUtil)
+
+@(records: List[Record])
 <!doctype html>
 <html lang=en>
     <head>
@@ -31,9 +34,6 @@
         }
         </style>
 
-        <script src='/webjars/jquery/3.2.1/jquery.min.js'></script>
-        <script src='/webjars/webshim/1.15.10/js-webshim/minified/polyfiller.js'></script>
-
         <script type="text/javascript">
                 webshim.polyfill('forms forms-ext');
         </script>
@@ -49,7 +49,7 @@
                     <tr>
                         <th></th>
                         <th>int4 (Int)</th>
-                        <th>timestamptz (Instant)</th>
+                        <th>timestamp (Instant)</th>
                         <th>varchar (String)</th>
                         <th></th>
                     </tr>
@@ -57,17 +57,17 @@
                 <tbody>
                     <tr>
                         <td></td>
-                        <td><input id="i" name="i" type="number" step="1"></td>
-                        <td><input id="t" name="t" type="datetime-local"> UTC</td>
-                        <td><input id="s" name="s" type="text"></td>
+                        <td><input id="integer" name="integer" type="number" step="1"></td>
+                        <td><input id="timestamp" name="timestamp" type="datetime-local"> UTC</td>
+                        <td><input id="varchar" name="varchar" type="text"></td>
                         <td><button type="submit">Add</button></td>
                     </tr>
                     @for((r, idx) <- records.zipWithIndex) {
                         <tr>
                             <td>@idx</td>
-                            <td>@r.i</td>
-                            <td>@r.t</td>
-                            <td>@r.s</td>
+                            <td>@r.getInteger()</td>
+                            <td>@r.getTimestamp()</td>
+                            <td>@r.getVarchar()</td>
                             <td></td>
                         </tr>
                     }

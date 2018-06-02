@@ -1,0 +1,5 @@
+GET         /list                 io.rdbc.examples.playscala.controllers.ApplicationController.list
+POST        /insert               io.rdbc.examples.playscala.controllers.ApplicationController.insert
+GET         /stream               io.rdbc.examples.playscala.controllers.ApplicationController.stream
+
+->          /webjars              webjars.Routes
