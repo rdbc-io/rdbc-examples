@@ -10,7 +10,22 @@ Chapters below describe the implemented examples.
 
 ## Examples
 
+* [Simple](#simple)
 * [Play Framework](#play-framework)
+
+### Simple
+
+You can find the code of this example in [simple-java](https://github.com/rdbc-io/rdbc-examples/tree/master/simple-java)
+directory. As the name suggest it's just a simple piece of code implemented in
+Java that inserts a couple of records and queries them afterwards.
+
+The projects use the API with the PostgreSQL driver. Before you run the project,
+start PostgreSQL server on the local machine and configure it to accept
+connections with password authentication method using "postgres" username
+and "postgres" password.
+
+To run the project, enter the rdbc-examples directory and start the application
+with SBT using `sbt simple-java/run`.
 
 ### Play Framework
 

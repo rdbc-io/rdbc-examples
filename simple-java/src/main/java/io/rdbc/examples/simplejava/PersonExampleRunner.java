@@ -48,7 +48,7 @@ public class PersonExampleRunner {
                 ConnectionPoolConfig
                         .builder()
                         .name("example")
-                        .size(10)
+                        .size(5)
                         .build()
         );
 
