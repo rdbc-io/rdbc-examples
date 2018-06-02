@@ -14,9 +14,9 @@ Chapters below describe the implemented examples.
 
 ### Play Framework
 
-You can find a Scala version of the example in [rdbc-play-scala](https://github.com/rdbc-io/rdbc-examples/tree/master/rdbc-play-scala)
+You can find a Scala version of the example in [play-scala](https://github.com/rdbc-io/rdbc-examples/tree/master/play-scala)
 directory and Java version in  
-[rdbc-play-java](https://github.com/rdbc-io/rdbc-examples/tree/master/rdbc-play-java).
+[play-java](https://github.com/rdbc-io/rdbc-examples/tree/master/play-java).
 
 The projects use the API with the PostgreSQL driver. Before you run the project,
 start PostgreSQL server on the local machine and configure it to accept
@@ -35,12 +35,12 @@ defined in the sample table.
 * [`/stream`](http://localhost:9000/stream) - endpoint streaming table contents as JSONs.
 
 See `Module` class 
-([Scala](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-scala/app/io/rdbc/examples/playscala/Module.scala),
-[Java](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-java/app/io/rdbc/examples/playjava/Module.java))
+([Scala](https://github.com/rdbc-io/rdbc-examples/blob/master/play-scala/app/io/rdbc/examples/playscala/Module.scala),
+[Java](https://github.com/rdbc-io/rdbc-examples/blob/master/play-java/app/io/rdbc/examples/playjava/Module.java))
 for the code that configures connection pool and creates a sample table. Inspect
 `ApplicationController`
-([Scala](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-scala/app/io/rdbc/examples/playscala/controllers/ApplicationController.scala),
-[Java](https://github.com/rdbc-io/rdbc-examples/blob/master/rdbc-play-java/app/io/rdbc/examples/playjava/controllers/ApplicationController.scala))
+([Scala](https://github.com/rdbc-io/rdbc-examples/blob/master/play-scala/app/io/rdbc/examples/playscala/controllers/ApplicationController.scala),
+[Java](https://github.com/rdbc-io/rdbc-examples/blob/master/play-java/app/io/rdbc/examples/playjava/controllers/ApplicationController.java))
 class for the implementation of selecting and inserting values and also for the 
 streaming. It may be interesting for you to add many records to the table, say,
 100 000 and compare behavior of the application when:
